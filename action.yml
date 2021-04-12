@@ -1,0 +1,20 @@
+name: 'Action to build and deploy artifact'
+description: 'Build and deploy mulesoft artifact'
+author: 'Muzammal Nazir'
+
+inputs:
+  GITHUB_TOKEN:
+    description: 'GitHub token'
+    required: true
+  buildArgs:
+    description: 'Json object'
+    required: false
+    default: "{}"
+  deployArgs:
+    description: 'Json object'
+    required: false
+    default: "{}"
+
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
