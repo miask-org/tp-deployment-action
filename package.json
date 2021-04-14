@@ -17,15 +17,8 @@
     "url": "https://github.com/miask-org/tp-deployment-action/issues"
   },
   "homepage": "https://github.com/miask-org/tp-deployment-action#readme",
-  "devDependencies": {
-    "@actions/core": "^1.2.6",
-    "@actions/exec": "^1.0.4",
-    "@actions/github": "^4.0.0",
-    "@vercel/ncc": "^0.28.0",
-    "anypoint-cli": "^3.4.3",
-    "child_process": "^1.0.2"
-  },
   "dependencies": {
-    "@actions/exec": "^1.0.4"
+    "@actions/core": "^1.2.7",
+    "@actions/github": "^4.0.0"
   }
 }

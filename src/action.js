@@ -1,9 +1,5 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
-const cp = require('child_process');
-const util = require('util');
-const fs = require('fs');
-const exec = util.promisify(cp.exec);
 const https = require('https');
 
 let deployArgs = {};
@@ -11,7 +7,8 @@ let deployArgs = {};
 async function main() {
   const GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
   deployArgs = parseJSON(core.getInput('deployArgs'));
-
+  console.log(deployArgs);
+  
   if (!deployArgs) return;
 
   const octokit = github.getOctokit(GITHUB_TOKEN);
