@@ -6,10 +6,6 @@ inputs:
   GITHUB_TOKEN:
     description: 'GitHub token'
     required: true
-  buildArgs:
-    description: 'Json object'
-    required: false
-    default: "{}"
   deployArgs:
     description: 'Json object'
     required: false
