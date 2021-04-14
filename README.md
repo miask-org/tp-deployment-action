@@ -1,1 +1,1 @@
-# tp-private-action
+# tp-deployment-action

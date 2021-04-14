@@ -1,5 +1,5 @@
 {
-  "name": "tp-private-action",
+  "name": "tp-deployment-action",
   "version": "1.0.0",
   "description": "My second github action.",
   "main": "index.js",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/miask-org/tp-private-action.git"
+    "url": "git+https://github.com/miask-org/tp-deployment-action.git"
   },
   "author": "Muzammal Nazir",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/miask-org/tp-private-action/issues"
+    "url": "https://github.com/miask-org/tp-deployment-action/issues"
   },
-  "homepage": "https://github.com/miask-org/tp-private-action#readme",
+  "homepage": "https://github.com/miask-org/tp-deployment-action#readme",
   "devDependencies": {
     "@actions/core": "^1.2.6",
     "@actions/exec": "^1.0.4",
