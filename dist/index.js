@@ -11,9 +11,8 @@ const cp = __nccwpck_require__(129);
 const util = __nccwpck_require__(669);
 const fs = __nccwpck_require__(747);
 const exec = util.promisify(cp.exec);
+const https = __nccwpck_require__(211);
 
-
-let artifactInfo = {};
 let deployArgs = {};
 
 async function main() {
@@ -27,8 +26,11 @@ async function main() {
 
   try {
     const release = await getRelease(octokit, context);
+    console.log('Release: ' + release);
     const artifactId = filterArtifactId(release);
+    console.log('ArtifactId: ' + artifactId);
     const artifact = await getReleaseAsset(octokit, context, artifactId);
+    console.log('artifact: ' + artifactId);
     await uploadToCloudHub(artifact);
     
     console.log("Action executed successfully.");
@@ -77,11 +79,36 @@ async function getReleaseAsset(octokit, context, assetId) {
   })).data;
 }
 
-async function uploadToCloudHub() {   
+async function uploadToCloudHub(artifact) {   
   const {client_id, client_secret} = deployArgs.cloudhub_creds;
 
   for (const app of deployArgs.cloudhub_apps) {   
-    await exec("anypoint-cli --client_id=" + client_id + " --client_secret=" + client_secret + " --environment=" + app.env + " runtime-mgr cloudhub-application modify " + app.name + " " + artifactInfo.path);
+    //await exec("anypoint-cli --client_id=" + client_id + " --client_secret=" + client_secret + " --environment=" + app.env + " runtime-mgr cloudhub-application modify " + app.name + " " + artifactInfo.path);
+    const options = {
+      hostname: 'https://anypoint.mulesoft.com/cloudhub/api',
+      path: '/v2/applications/'+ app.name +'/files',
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer fea1269d-19bd-422d-a9f2-7a7714abb487',
+        'X-ANYPNT-ENV-ID': '2d3e57e6-2165-48ac-9d9a-29f7e3367204'
+      },
+      body: artifact
+    }
+    const req = https.request(options, res => {
+      console.log(`statusCode: ${res.statusCode}`)
+    
+      res.on('data', d => {
+        process.stdout.write(d)
+      })
+    })
+    
+    req.on('error', error => {
+      console.error(error)
+    })
+    
+    req.write(data)
+    req.end()
+
     console.log(app.env + " updated successfully.");
   };
   return true;
@@ -130,6 +157,14 @@ module.exports = require("child_process");;
 
 "use strict";
 module.exports = require("fs");;
+
+/***/ }),
+
+/***/ 211:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("https");;
 
 /***/ }),
 
