@@ -21,8 +21,8 @@ async function main() {
     console.log('ArtifactId: ' + artifactId);
     const artifact = await getReleaseAsset(octokit, context, artifactId);
     console.log('artifact: ' + artifact.data.name);
-    console.log('status: ' + artifact.Status);
-    console.log('Complete: ' + artifact);
+    console.log('status: ' + artifact.httpStatus);
+    console.log('Complete: ' + JSON.stringify(artifact));
     await uploadToCloudHub(artifact);
     
     console.log("Action executed successfully.");
