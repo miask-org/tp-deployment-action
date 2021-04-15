@@ -24,7 +24,7 @@ async function main() {
     const artifact = await getReleaseAsset(octokit, context, artifactId);
     console.log('artifact: ' + artifact.data);
     const buff = toBuffer(artifact.data);
-    console.log('buff: ' + buff);
+    //console.log('buff: ' + buff);
     await uploadToCloudHub(buff);
     
     console.log("Action executed successfully.");
@@ -106,15 +106,18 @@ async function uploadToCloudHub(artifact) {
     
     req.end()*/
 
-    var form = new FormData();
-    form.append('file', artifact);
+    var form_data = new FormData();
+    form_data.append('file', artifact);
 
     axios({
       method: "post",
       url: "https://anypoint.mulesoft.com/cloudhub/api/v2/applications/" + app.name + "/files",
-      data: form,
-      headers: { "Content-Type": "multipart/form-data", 'X-ANYPNT-ENV-ID': app.env_id },
-      auth: { username: client_id,  password: client_secret }
+      auth: { username: client_id,  password: client_secret },
+      data: form_data,
+      headers: { 
+        ...form_data.getHeaders(),
+        "Content-Length": form_data.getLengthSync(), 
+        'X-ANYPNT-ENV-ID': app.env_id }
     })
     .then((response) => {
       console.log('Response:: ', response);
