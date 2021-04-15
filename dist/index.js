@@ -5917,9 +5917,8 @@ async function main() {
     const artifactId = filterArtifactId(release);
     console.log('ArtifactId: ' + artifactId);
     const artifact = await getReleaseAsset(octokit, context, artifactId);
-    console.log('artifact: ' + artifact.data.name);
-    console.log('status: ' + artifact.httpStatus);
-    console.log('Complete: ' + JSON.stringify(artifact));
+    console.log('Complete: ' + artifact.data);
+    console.log('JSON Complete: ' + JSON.stringify(artifact));
     await uploadToCloudHub(artifact);
     
     console.log("Action executed successfully.");
