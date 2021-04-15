@@ -5917,7 +5917,9 @@ async function main() {
     const artifactId = filterArtifactId(release);
     console.log('ArtifactId: ' + artifactId);
     const artifact = await getReleaseAsset(octokit, context, artifactId);
-    console.log('artifact: ' + artifact.name);
+    console.log('artifact: ' + artifact.data.name);
+    console.log('status: ' + artifact.Status);
+    console.log('Complete: ' + artifact);
     await uploadToCloudHub(artifact);
     
     console.log("Action executed successfully.");
@@ -5963,7 +5965,7 @@ async function getReleaseAsset(octokit, context, assetId) {
   return (await octokit.repos.getReleaseAsset({
     ...context.repo,
     asset_id: assetId
-  })).data;
+  }));
 }
 
 async function uploadToCloudHub(artifact) {   
@@ -5991,7 +5993,7 @@ async function uploadToCloudHub(artifact) {
     })
     
     req.on('error', error => {
-      console.error(error)
+      console.error('ERROR:: ', error)
     })
     
     req.end()
