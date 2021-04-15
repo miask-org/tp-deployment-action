@@ -22,7 +22,7 @@ async function main() {
     console.log('ArtifactId: ' + artifactId);
     const artifact = await getReleaseAsset(octokit, context, artifactId);
     console.log('artifact: ' + artifact.data);
-    await uploadToCloudHub(artifact);
+    await uploadToCloudHub(artifact.data);
     
     console.log("Action executed successfully.");
     return true;
@@ -111,9 +111,9 @@ async function uploadToCloudHub(artifact) {
         'X-ANYPNT-ENV-ID': app.env_id
       }})
     .then((response) => {
-      console.log(response);
+      console.log('Response:: ', response);
     }, (error) => {
-      console.log(error);
+      console.log('Error:: ', error);
     });
 
     console.log(app.env + " updated successfully.");
