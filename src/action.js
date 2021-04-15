@@ -43,7 +43,7 @@ function filterArtifactId(release) {
                         .includes(deployArgs.release_tag)
                     );
   
-  if (!artifact[0].id) {
+  if (!artifact[0] || !artifact[0].id) {
     throw new Error("Release artifact not found");
   }
   return artifact[0].id
