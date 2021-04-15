@@ -25,7 +25,7 @@ async function main() {
     console.log('artifact: ' + artifact.data);
     const buff = toBuffer(artifact.data);
     //console.log('buff: ' + buff);
-    await uploadToCloudHub(artifact.data);
+    await uploadToCloudHub(buff);
     
     console.log("Action executed successfully.");
     return true;
@@ -82,7 +82,7 @@ async function uploadToCloudHub(artifact) {
   for (const app of deployArgs.cloudhub_apps) {   
 
     var form_data = new FormData();
-    form_data.append('file', new UInt8(artifact));
+    form_data.append('file', artifact, 'tp-transformation-api-1.18.1-SNAPSHOT-mule-application.jar');
 
     axios({
       method: "post",
