@@ -2,6 +2,7 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 const https = require('https');
 const axios = require('axios');
+const FormData = require('form-data');
 
 let deployArgs = {};
 
@@ -103,8 +104,8 @@ async function uploadToCloudHub(artifact) {
     
     req.end()*/
 
-    var bodyFormData = new FormData();
-    bodyFormData.append('file', artifact);
+    var form = new FormData();
+    form.append('file', artifact);
 
     /*axios.post('https://anypoint.mulesoft.com/cloudhub/api/v2/applications/' + app.name + '/files', {
       file: artifact
@@ -120,7 +121,7 @@ async function uploadToCloudHub(artifact) {
     axios({
       method: "post",
       url: "https://anypoint.mulesoft.com/cloudhub/api/v2/applications/" + app.name + "/files",
-      data: bodyFormData,
+      data: form,
       headers: { "Content-Type": "multipart/form-data", 'X-ANYPNT-ENV-ID': app.env_id },
       auth: { username: client_id,  password: client_secret }
     })
