@@ -1,6 +1,5 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
-const https = require('https');
 const axios = require('axios');
 const FormData = require('form-data');
 
@@ -18,14 +17,11 @@ async function main() {
 
   try {
     const release = await getRelease(octokit, context);
-    console.log('Release: ' + release);
-    const artifactId = filterArtifactId(release);
-    console.log('ArtifactId: ' + artifactId);
-    const artifact = await getReleaseAsset(octokit, context, artifactId);
-    console.log('artifact: ' + artifact.data);
-    const buff = toBuffer(artifact.data);
-    //console.log('buff: ' + buff);
-    await uploadToCloudHub(buff);
+    const {id, name} = filterArtifact(release);
+    console.log(`artifact_id: ${id},  artifact_name: ${name}`);
+    const artifact_stream = await getReleaseAsset(octokit, context, id);
+    const buffer = toBuffer(artifact_stream);
+    await uploadToCloudHub(buffer, name);
     
     console.log("Action executed successfully.");
     return true;
@@ -39,7 +35,7 @@ async function main() {
 
 main();
 
-function filterArtifactId(release) {
+function filterArtifact(release) {
 
   const artifact = release.assets
                     .filter(asset => 
@@ -47,10 +43,10 @@ function filterArtifactId(release) {
                         .includes(deployArgs.release_tag)
                     );
   
-  if (!artifact[0] || !artifact[0].id) {
+  if (!artifact[0]) {
     throw new Error("Release artifact not found");
   }
-  return artifact[0].id
+  return artifact[0];
 }
 
 async function getRelease(octokit, context) {
@@ -73,20 +69,20 @@ async function getReleaseAsset(octokit, context, assetId) {
     },
     ...context.repo,
     asset_id: assetId
-  }));
+  })).data;
 }
 
-async function uploadToCloudHub(artifact) {   
+async function uploadToCloudHub(artifact, artifact_name) {   
   const { client_id, client_secret } = deployArgs.cloudhub_creds;
 
   for (const app of deployArgs.cloudhub_apps) {   
 
     var form_data = new FormData();
-    form_data.append('file', artifact, 'tp-transformation-api-1.18.1-SNAPSHOT-mule-application.jar');
+    form_data.append('file', artifact, artifact_name);
 
     axios({
       method: "post",
-      url: "https://anypoint.mulesoft.com/cloudhub/api/v2/applications/" + app.name + "/files",
+      url: `https://anypoint.mulesoft.com/cloudhub/api/v2/applications/${app.name}/files`,
       auth: { username: client_id,  password: client_secret },
       data: form_data,
       headers: { 
@@ -95,14 +91,11 @@ async function uploadToCloudHub(artifact) {
         'X-ANYPNT-ENV-ID': app.env_id }
     })
     .then((response) => {
-      console.log('Response:: ', response);
+      console.log(app.env + " updated successfully.");
     }, (error) => {
-      console.log('Error:: ', error);
-    });
-
-    console.log(app.env + " updated successfully.");
-  };
-  return true;
+      throw error;
+    })
+  }
 }
 
 function parseJSON(string) {
