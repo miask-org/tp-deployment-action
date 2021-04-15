@@ -1,6 +1,7 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 const https = require('https');
+const axios = require('axios');
 
 let deployArgs = {};
 
@@ -20,8 +21,7 @@ async function main() {
     const artifactId = filterArtifactId(release);
     console.log('ArtifactId: ' + artifactId);
     const artifact = await getReleaseAsset(octokit, context, artifactId);
-    console.log('Complete: ' + artifact.data);
-    console.log('JSON Complete: ' + JSON.stringify(artifact));
+    console.log('artifact: ' + artifact.data);
     await uploadToCloudHub(artifact);
     
     console.log("Action executed successfully.");
@@ -89,7 +89,7 @@ async function uploadToCloudHub(artifact) {
       },
       body: artifact
     }
-    const req = https.request(options, res => {
+    /*const req = https.request(options, res => {
       console.log(`statusCode: ${res.statusCode}`)
     
       res.on('data', d => {
@@ -101,7 +101,20 @@ async function uploadToCloudHub(artifact) {
       console.error('ERROR:: ', error)
     })
     
-    req.end()
+    req.end()*/
+
+    axios.post('https://anypoint.mulesoft.com/cloudhub/api/v2/applications/' + app.name + '/files', {
+      file: artifact
+    },{
+      headers: {
+        'Authorization': 'Bearer ' + basic_token,
+        'X-ANYPNT-ENV-ID': app.env_id
+      }})
+    .then((response) => {
+      console.log(response);
+    }, (error) => {
+      console.log(error);
+    });
 
     console.log(app.env + " updated successfully.");
   };
