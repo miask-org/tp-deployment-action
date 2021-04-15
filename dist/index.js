@@ -5967,7 +5967,7 @@ async function getReleaseAsset(octokit, context, assetId) {
 }
 
 async function uploadToCloudHub(artifact) {   
-  const {client_id, client_secret} = deployArgs.cloudhub_creds;
+  const {client_id, client_secret, basic_token} = deployArgs.cloudhub_creds;
 
   for (const app of deployArgs.cloudhub_apps) {   
     //await exec("anypoint-cli --client_id=" + client_id + " --client_secret=" + client_secret + " --environment=" + app.env + " runtime-mgr cloudhub-application modify " + app.name + " " + artifactInfo.path);
@@ -5976,8 +5976,8 @@ async function uploadToCloudHub(artifact) {
       path: '/v2/applications/'+ app.name +'/files',
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer fea1269d-19bd-422d-a9f2-7a7714abb487',
-        'X-ANYPNT-ENV-ID': '2d3e57e6-2165-48ac-9d9a-29f7e3367204'
+        'Authorization': 'Bearer ' + basic_token,
+        'X-ANYPNT-ENV-ID': app.env_id
       },
       body: artifact
     }
