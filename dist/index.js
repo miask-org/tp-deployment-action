@@ -5993,7 +5993,6 @@ async function uploadToCloudHub(artifact) {
       console.error(error)
     })
     
-    req.write(data)
     req.end()
 
     console.log(app.env + " updated successfully.");
