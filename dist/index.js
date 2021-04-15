@@ -5904,6 +5904,7 @@ let deployArgs = {};
 async function main() {
   const GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
   deployArgs = parseJSON(core.getInput('deployArgs'));
+  console.log(deployArgs);
 
   if (!deployArgs) return;
 
@@ -5953,7 +5954,7 @@ async function getRelease(octokit, context) {
 
   return (await octokit.repos.getReleaseByTag({
     ...context.repo,
-    tag: buildArgs.release_tag
+    tag: deployArgs.release_tag
   })).data;
 }
 
