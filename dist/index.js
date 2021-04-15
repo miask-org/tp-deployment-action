@@ -10044,7 +10044,9 @@ async function main() {
     console.log('ArtifactId: ' + artifactId);
     const artifact = await getReleaseAsset(octokit, context, artifactId);
     console.log('artifact: ' + artifact.data);
-    await uploadToCloudHub(artifact.data);
+    const buff = toBuffer(artifact.data);
+    console.log('buff: ' + buff);
+    await uploadToCloudHub(buff);
     
     console.log("Action executed successfully.");
     return true;
@@ -10096,11 +10098,11 @@ async function getReleaseAsset(octokit, context, assetId) {
 }
 
 async function uploadToCloudHub(artifact) {   
-  const {client_id, client_secret, basic_token} = deployArgs.cloudhub_creds;
+  const { client_id, client_secret } = deployArgs.cloudhub_creds;
 
   for (const app of deployArgs.cloudhub_apps) {   
     //await exec("anypoint-cli --client_id=" + client_id + " --client_secret=" + client_secret + " --environment=" + app.env + " runtime-mgr cloudhub-application modify " + app.name + " " + artifactInfo.path);
-    const options = {
+    /*const options = {
       hostname: 'https://anypoint.mulesoft.com/cloudhub/api/',
       port: 443,
       path: 'v2/applications/'+ app.name +'/files',
@@ -10111,7 +10113,7 @@ async function uploadToCloudHub(artifact) {
       },
       body: artifact
     }
-    /*const req = https.request(options, res => {
+    const req = https.request(options, res => {
       console.log(`statusCode: ${res.statusCode}`)
     
       res.on('data', d => {
@@ -10128,17 +10130,6 @@ async function uploadToCloudHub(artifact) {
     var form = new FormData();
     form.append('file', artifact);
 
-    /*axios.post('https://anypoint.mulesoft.com/cloudhub/api/v2/applications/' + app.name + '/files', {
-      file: artifact
-    },{
-      auth: {
-        username: client_id,
-        password: client_secret
-      },
-      headers: {
-        'X-ANYPNT-ENV-ID': app.env_id
-      }
-    })*/
     axios({
       method: "post",
       url: "https://anypoint.mulesoft.com/cloudhub/api/v2/applications/" + app.name + "/files",
@@ -10167,6 +10158,16 @@ function parseJSON(string) {
     core.setFailed(error.message)
   }
   return null;
+}
+
+
+function toBuffer(ab) {
+  var buf = Buffer.alloc(ab.byteLength);
+  var view = new Uint8Array(ab);
+  for (var i = 0; i < buf.length; ++i) {
+      buf[i] = view[i];
+  }
+  return buf;
 }
 
 /***/ }),
