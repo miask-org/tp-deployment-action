@@ -8615,7 +8615,10 @@ async function uploadToCloudHub(artifact) {
     
     req.end()*/
 
-    axios.post('https://anypoint.mulesoft.com/cloudhub/api/v2/applications/' + app.name + '/files', {
+    var bodyFormData = new FormData();
+    bodyFormData.append('file', artifact);
+
+    /*axios.post('https://anypoint.mulesoft.com/cloudhub/api/v2/applications/' + app.name + '/files', {
       file: artifact
     },{
       auth: {
@@ -8625,6 +8628,13 @@ async function uploadToCloudHub(artifact) {
       headers: {
         'X-ANYPNT-ENV-ID': app.env_id
       }
+    })*/
+    axios({
+      method: "post",
+      url: "https://anypoint.mulesoft.com/cloudhub/api/v2/applications/" + app.name + "/files",
+      data: bodyFormData,
+      headers: { "Content-Type": "multipart/form-data", 'X-ANYPNT-ENV-ID': app.env_id },
+      auth: { username: client_id,  password: client_secret }
     })
     .then((response) => {
       console.log('Response:: ', response);
