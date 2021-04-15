@@ -20,9 +20,8 @@ async function main() {
     const artifactId = filterArtifactId(release);
     console.log('ArtifactId: ' + artifactId);
     const artifact = await getReleaseAsset(octokit, context, artifactId);
-    console.log('artifact: ' + artifact.data.name);
-    console.log('status: ' + artifact.httpStatus);
-    console.log('Complete: ' + JSON.stringify(artifact));
+    console.log('Complete: ' + artifact.data);
+    console.log('JSON Complete: ' + JSON.stringify(artifact));
     await uploadToCloudHub(artifact);
     
     console.log("Action executed successfully.");
@@ -65,7 +64,10 @@ async function getRelease(octokit, context) {
 
 async function getReleaseAsset(octokit, context, assetId) {
 
-  return (await octokit.repos.getReleaseAsset({
+  return (await octokit.request("GET /repos/{owner}/{repo}/releases/assets/{asset_id}", {
+    headers: {
+      Accept: "application/octet-stream",
+    },
     ...context.repo,
     asset_id: assetId
   }));

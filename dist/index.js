@@ -5962,7 +5962,10 @@ async function getRelease(octokit, context) {
 
 async function getReleaseAsset(octokit, context, assetId) {
 
-  return (await octokit.repos.getReleaseAsset({
+  return (await octokit.request("GET /repos/{owner}/{repo}/releases/assets/{asset_id}", {
+    headers: {
+      Accept: "application/octet-stream",
+    },
     ...context.repo,
     asset_id: assetId
   }));
