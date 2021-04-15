@@ -5917,7 +5917,7 @@ async function main() {
     const artifactId = filterArtifactId(release);
     console.log('ArtifactId: ' + artifactId);
     const artifact = await getReleaseAsset(octokit, context, artifactId);
-    console.log('artifact: ' + artifact);
+    console.log('artifact: ' + parseJSON(artifact));
     await uploadToCloudHub(artifact);
     
     console.log("Action executed successfully.");
@@ -5972,8 +5972,8 @@ async function uploadToCloudHub(artifact) {
   for (const app of deployArgs.cloudhub_apps) {   
     //await exec("anypoint-cli --client_id=" + client_id + " --client_secret=" + client_secret + " --environment=" + app.env + " runtime-mgr cloudhub-application modify " + app.name + " " + artifactInfo.path);
     const options = {
-      hostname: 'https://anypoint.mulesoft.com/cloudhub/api',
-      path: '/v2/applications/'+ app.name +'/files',
+      hostname: 'https://anypoint.mulesoft.com/cloudhub/api/',
+      path: 'v2/applications/'+ app.name +'/files',
       method: 'POST',
       headers: {
         'Authorization': 'Bearer ' + basic_token,
