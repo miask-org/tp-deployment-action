@@ -25,7 +25,7 @@ async function main() {
     console.log('artifact: ' + artifact.data);
     const buff = toBuffer(artifact.data);
     //console.log('buff: ' + buff);
-    await uploadToCloudHub(buff);
+    await uploadToCloudHub(artifact.data);
     
     console.log("Action executed successfully.");
     return true;
@@ -80,34 +80,9 @@ async function uploadToCloudHub(artifact) {
   const { client_id, client_secret } = deployArgs.cloudhub_creds;
 
   for (const app of deployArgs.cloudhub_apps) {   
-    //await exec("anypoint-cli --client_id=" + client_id + " --client_secret=" + client_secret + " --environment=" + app.env + " runtime-mgr cloudhub-application modify " + app.name + " " + artifactInfo.path);
-    /*const options = {
-      hostname: 'https://anypoint.mulesoft.com/cloudhub/api/',
-      port: 443,
-      path: 'v2/applications/'+ app.name +'/files',
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + basic_token,
-        'X-ANYPNT-ENV-ID': app.env_id
-      },
-      body: artifact
-    }
-    const req = https.request(options, res => {
-      console.log(`statusCode: ${res.statusCode}`)
-    
-      res.on('data', d => {
-        process.stdout.write(d)
-      })
-    })
-    
-    req.on('error', error => {
-      console.error('ERROR:: ', error)
-    })
-    
-    req.end()*/
 
     var form_data = new FormData();
-    form_data.append('file', artifact);
+    form_data.append('file', new UInt8(artifact));
 
     axios({
       method: "post",
