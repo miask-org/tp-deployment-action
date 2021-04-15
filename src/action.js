@@ -106,10 +106,14 @@ async function uploadToCloudHub(artifact) {
     axios.post('https://anypoint.mulesoft.com/cloudhub/api/v2/applications/' + app.name + '/files', {
       file: artifact
     },{
+      auth: {
+        username: client_id,
+        password: client_secret
+      },
       headers: {
-        'Authorization': 'Bearer ' + basic_token,
         'X-ANYPNT-ENV-ID': app.env_id
-      }})
+      }
+    })
     .then((response) => {
       console.log('Response:: ', response);
     }, (error) => {
