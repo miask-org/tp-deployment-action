@@ -10105,27 +10105,32 @@ async function getReleaseAsset(octokit, context, assetId) {
 
 async function uploadToCloudHub(artifact, artifact_name) {   
   const { client_id, client_secret } = deployArgs.cloudhub_creds;
+  try{
+    for (const app of deployArgs.cloudhub_apps) {   
 
-  for (const app of deployArgs.cloudhub_apps) {   
+      var form_data = new FormData();
+      form_data.append('file', artifact, artifact_name);
 
-    var form_data = new FormData();
-    form_data.append('file', artifact, artifact_name);
-
-    axios({
-      method: "post",
-      url: `https://anypoint.mulesoft.com/cloudhub/api/v2/applications/${app.name}/files`,
-      auth: { username: client_id,  password: client_secret },
-      data: form_data,
-      headers: { 
-        ...form_data.getHeaders(),
-        "Content-Length": form_data.getLengthSync(), 
-        'X-ANYPNT-ENV-ID': app.env_id }
-    })
-    .then((response) => {
-      console.log(app.env + " updated successfully.");
-    }, (error) => {
-      throw error;
-    })
+      axios({
+        method: "post",
+        url: `https://anypoint.mulesoft.com/cloudhub/api/v2/applications/${app.name}/files`,
+        auth: { username: client_id,  password: client_secret },
+        data: form_data,
+        headers: { 
+          ...form_data.getHeaders(),
+          "Content-Length": form_data.getLengthSync(), 
+          'X-ANYPNT-ENV-ID': app.env_id }
+      })
+      .then((response) => {
+        console.log(app.env + " updated successfully.");
+      }, (error) => {
+        throw error;
+      })
+    }
+  }
+  catch(error){
+    console.error(error);
+    core.setFailed(error.message);
   }
 }
 
