@@ -10040,13 +10040,16 @@ async function main() {
     const release = await getRelease(octokit, context);
     const {id, name} = filterArtifact(release);
     console.log(`artifact_id: ${id},  artifact_name: ${name}`);
+
     const artifact_stream = await getReleaseAsset(octokit, context, id);
-    
+    console.log('Release asset downloaded.');
+
     const buffer = toBuffer(artifact_stream);
-    console.log('Buffer done.');
-    await uploadToCloudHub(buffer, name);
-    
+    console.log('ArrayBuffer converted to Buffer.');
+
+    await uploadToCloudHub(buffer, name);    
     console.log("Action executed successfully.");
+
     return true;
   }
   catch (error) {
@@ -10086,51 +10089,44 @@ async function getRelease(octokit, context) {
 
 async function getReleaseAsset(octokit, context, assetId) {
   let result = null;
-  try {
-    result = (await octokit.request("GET /repos/{owner}/{repo}/releases/assets/{asset_id}", {
-      headers: {
-        Accept: "application/octet-stream",
-      },
-      ...context.repo,
-      asset_id: assetId
-    }));
-    console.log('getReleaseAsset done.');
-    return result.data;
-  }
-  catch(error){
-    console.error(error);
-    core.setFailed(error.message);
-  }
+
+  result = (await octokit.request("GET /repos/{owner}/{repo}/releases/assets/{asset_id}", {
+    headers: {
+      Accept: "application/octet-stream",
+    },
+    ...context.repo,
+    asset_id: assetId
+  }));
+  console.log('getReleaseAsset done.');
+  return result.data;
 }
 
 async function uploadToCloudHub(artifact, artifact_name) {   
   const { client_id, client_secret } = deployArgs.cloudhub_creds;
-  try{
-    for (const app of deployArgs.cloudhub_apps) {   
 
-      var form_data = new FormData();
-      form_data.append('file', artifact, artifact_name);
+  for (const app of deployArgs.cloudhub_apps) {   
 
-      axios({
-        method: "post",
-        url: `https://anypoint.mulesoft.com/cloudhub/api/v2/applications/${app.name}/files`,
-        auth: { username: client_id,  password: client_secret },
-        data: form_data,
-        headers: { 
-          ...form_data.getHeaders(),
-          "Content-Length": form_data.getLengthSync(), 
-          'X-ANYPNT-ENV-ID': app.env_id }
-      })
-      .then((response) => {
-        console.log(app.env + " updated successfully.");
-      }, (error) => {
-        throw error;
-      })
-    }
-  }
-  catch(error){
-    console.error(error);
-    core.setFailed(error.message);
+    var form_data = new FormData();
+    form_data.append('file', artifact, artifact_name);
+
+    await axios({
+      method: "post",
+      url: `https://anypoint.mulesoft.com/cloudhub/api/v2/applications/${app.name}/files`,
+      auth: { username: client_id,  password: client_secret },
+      data: form_data,
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
+      headers: { 
+        ...form_data.getHeaders(),
+        "Content-Length": form_data.getLengthSync(), 
+        'X-ANYPNT-ENV-ID': app.env_id }
+    })
+    .then(() => {
+      console.log(app.env + " updated successfully.");
+    }, (error) => {
+      console.error(error);
+      core.setFailed(error.message);
+    })
   }
 }
 
@@ -10146,21 +10142,13 @@ function parseJSON(string) {
   return null;
 }
 
-
 function toBuffer(ab) {
-  try {
     var buf = Buffer.alloc(ab.byteLength);
     var view = new Uint8Array(ab);
     for (var i = 0; i < buf.length; ++i) {
         buf[i] = view[i];
     }
-    console.log("Buffering done")
     return buf;
-  }
-  catch(error){
-    console.error(error);
-    core.setFailed(error.message);
-  }
 }
 
 /***/ }),
