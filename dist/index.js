@@ -10097,7 +10097,6 @@ async function getReleaseAsset(octokit, context, assetId) {
     ...context.repo,
     asset_id: assetId
   }));
-  console.log('getReleaseAsset done.');
   return result.data;
 }
 
@@ -10112,7 +10111,7 @@ async function uploadToCloudHub(artifact, artifact_name) {
     await axios({
       method: "post",
       url: `https://anypoint.mulesoft.com/cloudhub/api/v2/applications/${app.name}/files`,
-      auth: { username: client_id,  password: client_secret },
+      auth: { client_id: client_id,  client_secret: client_secret },
       data: form_data,
       maxContentLength: Infinity,
       maxBodyLength: Infinity,
