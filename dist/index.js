@@ -10041,7 +10041,9 @@ async function main() {
     const {id, name} = filterArtifact(release);
     console.log(`artifact_id: ${id},  artifact_name: ${name}`);
     const artifact_stream = await getReleaseAsset(octokit, context, id);
+    
     const buffer = toBuffer(artifact_stream);
+    console.log('Buffer done.');
     await uploadToCloudHub(buffer, name);
     
     console.log("Action executed successfully.");
@@ -10092,7 +10094,7 @@ async function getReleaseAsset(octokit, context, assetId) {
       ...context.repo,
       asset_id: assetId
     }));
-
+    console.log('getReleaseAsset done.');
     return result.data;
   }
   catch(error){
@@ -10141,12 +10143,19 @@ function parseJSON(string) {
 
 
 function toBuffer(ab) {
-  var buf = Buffer.alloc(ab.byteLength);
-  var view = new Uint8Array(ab);
-  for (var i = 0; i < buf.length; ++i) {
-      buf[i] = view[i];
+  try {
+    var buf = Buffer.alloc(ab.byteLength);
+    var view = new Uint8Array(ab);
+    for (var i = 0; i < buf.length; ++i) {
+        buf[i] = view[i];
+    }
+    console.log("Buffering done")
+    return buf;
   }
-  return buf;
+  catch(error){
+    console.error(error);
+    core.setFailed(error.message);
+  }
 }
 
 /***/ }),
