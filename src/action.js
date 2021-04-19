@@ -71,9 +71,10 @@ async function getReleaseAsset(octokit, context, assetId) {
 
 async function uploadToCloudHub(CLIENT_ID, CLIENT_SECRET, ORG_ID, artifact, artifact_name, cloudhub_apps) {   
   const environments = await getEnvByOrgId(CLIENT_ID, CLIENT_SECRET, ORG_ID);
-
+  console.log("environments:: " + environments);
   for (const app of cloudhub_apps) {   
     const env = environments.filter(env => env.name.toUpperCase() == app.name.toUpperCase());
+    console.log("ENV:: " + env);
     var form_data = new FormData();
     form_data.append('file', artifact, artifact_name);
     await axios({
@@ -85,7 +86,7 @@ async function uploadToCloudHub(CLIENT_ID, CLIENT_SECRET, ORG_ID, artifact, arti
       maxBodyLength: Infinity,
       headers: { 
         ...form_data.getHeaders(),
-        "Content-Length": form_data.getLengthSync(), 
+        "Content-Length": form_data.getLengthSync(),
         'X-ANYPNT-ENV-ID': env[0].id }
     })
     .then( () => {
