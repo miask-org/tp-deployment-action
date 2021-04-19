@@ -10031,7 +10031,10 @@ async function main() {
   const ORG_ID = 'fdebe0d5-a2d7-4594-b1d3-db10e283e63b';
 
   const release_tag = core.getInput('release-tag');
-  const cloudhub_apps = parseJSON(core.getInput('cloudhub-apps'));
+  const environments = core.getInput('environments');
+  const app_name_template = core.getInput('app-name-template');
+  const cloudhub_apps = parseJSON(getJsonOfApps(environments, app_name_template));
+  console.log('cloudhub-apps: ', cloudhub_apps);
 
   const octokit = github.getOctokit(GITHUB_TOKEN);
   const { context = {} } = github;
@@ -10153,6 +10156,20 @@ function toBuffer(ab) {
         buf[i] = view[i];
     }
     return buf;
+}
+
+function getJsonOfApps(environments, app_name_template) {
+
+  var envArray = environments.split(",");
+  var jsonString = '['
+
+  envArray.forEach((element, index) => {
+      jsonString = jsonString.concat(`{ "env": "${element.trim()}", "name":  "${app_name_template.replace("ENV", element.trim())}" }`);
+      jsonString = (index === envArray.length - 1) ? jsonString : jsonString.concat(',');
+  });
+  jsonString = jsonString.concat(']');
+
+  return jsonString;
 }
 
 /***/ }),

@@ -6,8 +6,11 @@ inputs:
   release-tag:
     description: 'Release tag name'
     required: true
-  cloudhub-apps:
-    description: 'Json object'
+  environments:
+    description: 'Comma separated list of environments'
+    required: true
+  app-name-template:
+    description: 'Application name template'
     required: true
 
 runs:
