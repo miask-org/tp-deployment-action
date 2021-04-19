@@ -10092,9 +10092,9 @@ async function getReleaseAsset(octokit, context, assetId) {
 
 async function uploadToCloudHub(CLIENT_ID, CLIENT_SECRET, ORG_ID, artifact, artifact_name, cloudhub_apps) {   
   const environments = await getEnvByOrgId(CLIENT_ID, CLIENT_SECRET, ORG_ID);
-  console.log("environments:: " + environments);
+
   for (const app of cloudhub_apps) {   
-    const env = environments.filter(env => env.name.toUpperCase() == app.name.toUpperCase());
+    const env = environments.filter(e => e.name.toUpperCase() == app.env.toUpperCase());
     console.log("ENV:: " + env);
     var form_data = new FormData();
     form_data.append('file', artifact, artifact_name);
