@@ -10095,7 +10095,7 @@ async function uploadToCloudHub(CLIENT_ID, CLIENT_SECRET, ORG_ID, artifact, arti
 
   for (const app of cloudhub_apps) {   
     const env = environments.filter(e => e.name.toUpperCase() == app.env.toUpperCase());
-    console.log("ENV:: " + env);
+
     var form_data = new FormData();
     form_data.append('file', artifact, artifact_name);
     await axios({
