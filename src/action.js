@@ -26,7 +26,7 @@ async function main() {
     const artifact_buffer = toBuffer(artifact_stream);
     console.log('ArrayBuffer converted to Buffer.');
 
-    uploadToCloudHub(CLIENT_ID, CLIENT_SECRET, ORG_ID, artifact_buffer, name, cloudhub_apps);
+    await uploadToCloudHub(CLIENT_ID, CLIENT_SECRET, ORG_ID, artifact_buffer, name, cloudhub_apps);
 
     return true;
   }
@@ -69,8 +69,8 @@ async function getReleaseAsset(octokit, context, assetId) {
   return response.data;
 }
 
-function uploadToCloudHub(CLIENT_ID, CLIENT_SECRET, ORG_ID, artifact, artifact_name, cloudhub_apps) {   
-  const environments = getEnvByOrgId(CLIENT_ID, CLIENT_SECRET, ORG_ID);
+async function uploadToCloudHub(CLIENT_ID, CLIENT_SECRET, ORG_ID, artifact, artifact_name, cloudhub_apps) {   
+  const environments = await getEnvByOrgId(CLIENT_ID, CLIENT_SECRET, ORG_ID);
 
   for (const app of cloudhub_apps) {   
     const env = environments.filter(env => env.name.toUpperCase() == app.name.toUpperCase());
