@@ -3,13 +3,12 @@ description: 'Build and deploy mulesoft artifact'
 author: 'Muzammal Nazir'
 
 inputs:
-  GITHUB_TOKEN:
-    description: 'GitHub token'
+  release-tag:
+    description: 'Release tag name'
     required: true
-  deployArgs:
+  cloudhub-apps:
     description: 'Json object'
-    required: false
-    default: "{}"
+    required: true
 
 runs:
   using: 'node12'
