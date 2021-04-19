@@ -74,9 +74,10 @@ async function uploadToCloudHub(CLIENT_ID, CLIENT_SECRET, ORG_ID, artifact, arti
 
   for (const app of cloudhub_apps) {   
     const env = environments.filter(env => env.name.toUpperCase() == app.name.toUpperCase());
+    console.log("env: ", env);
     var form_data = new FormData();
     form_data.append('file', artifact, artifact_name);
-    axios({
+    await axios({
       method: "post",
       url: `https://anypoint.mulesoft.com/cloudhub/api/v2/applications/${app.name}/files`,
       auth: { username: CLIENT_ID,  password: CLIENT_SECRET },
