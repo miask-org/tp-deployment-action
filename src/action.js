@@ -79,7 +79,7 @@ function uploadToCloudHub(CLIENT_ID, CLIENT_SECRET, ORG_ID, artifact, artifact_n
     axios({
       method: "post",
       url: `https://anypoint.mulesoft.com/cloudhub/api/v2/applications/${app.name}/files`,
-      auth: { client_id: CLIENT_ID,  client_secret: CLIENT_SECRET },
+      auth: { username: CLIENT_ID,  password: CLIENT_SECRET },
       data: form_data,
       maxContentLength: Infinity,
       maxBodyLength: Infinity,
