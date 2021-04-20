@@ -10031,8 +10031,8 @@ async function main() {
   const ORG_ID = 'fdebe0d5-a2d7-4594-b1d3-db10e283e63b';
 
   const release_tag = core.getInput('release-tag');
-  const environments = core.getInput('environments');
-  const app_name_template = core.getInput('app-name-template');
+  const environments = core.getInput('cloudhub-envs');
+  const app_name_template = core.getInput('cloudhub-app-name-pattern');
   const cloudhub_apps = parseJSON(getJsonOfApps(environments, app_name_template));
   console.log('cloudhub-apps: ', cloudhub_apps);
 
@@ -10164,7 +10164,8 @@ function getJsonOfApps(environments, app_name_template) {
   var jsonString = '['
 
   envArray.forEach((element, index) => {
-      jsonString = jsonString.concat(`{ "env": "${element.trim()}", "name":  "${app_name_template.replace("ENV", element.trim())}" }`);
+      var app_name = element.trim().toUpperCase() == "PROD" ? app_name_template.replace("-{ENV}", element.trim()) : app_name_template.replace("{ENV}", element.trim());
+      jsonString = jsonString.concat(`{ "env": "${element.trim()}", "name":  "${app_name}" }`);
       jsonString = (index === envArray.length - 1) ? jsonString : jsonString.concat(',');
   });
   jsonString = jsonString.concat(']');

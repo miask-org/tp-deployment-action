@@ -6,11 +6,11 @@ inputs:
   release-tag:
     description: 'Release tag name'
     required: true
-  environments:
-    description: 'Comma separated list of environments'
+  cloudhub-envs:
+    description: 'Comma separated list of cloudhub environments'
     required: true
-  app-name-template:
-    description: 'Application name template'
+  cloudhub-app-name-pattern:
+    description: 'Cloudhub application name pattern'
     required: true
 
 runs:
