@@ -10042,9 +10042,12 @@ async function main() {
         const release = await getRelease(octokit, context, release_tag);
         const { id, name } = release.assets.filter(asset => asset.name.includes(release_tag))[0];
         console.log(`id: ${id} name: ${name}`);
-        const artifact = getReleaseAsset(octokit, context, id);
-        console.log("artifact: ", artifact);
-        await uploadToCloudHub(cloudhub_org_id, cloudhub_envs, cloudhub_app_name_pattern, artifact, name, cloudhub_user, cloudhub_password);
+        const artifact_stream = await getReleaseAsset(octokit, context, id);
+        console.log('Release asset downloaded.');
+        const artifact_buffer = toBuffer(artifact_stream);	
+        console.log('ArrayBuffer converted to Buffer.');
+        console.log(` upload to cloud: ${cloudhub_org_id}, ${cloudhub_envs}, ${cloudhub_app_name_pattern}, ${cloudhub_user}, ${cloudhub_password}`)
+        await uploadToCloudHub(cloudhub_org_id, cloudhub_envs, cloudhub_app_name_pattern, artifact_buffer, name, cloudhub_user, cloudhub_password);
         console.log("action executed successfully.");
         return true;
     }
@@ -10072,21 +10075,14 @@ async function getRelease(octokit, context, release_tag) {
 }
 
 async function getReleaseAsset(octokit, context, assetId) {
-    let result = null;
-    try {
-        result = (await octokit.request("GET /repos/{owner}/{repo}/releases/assets/{asset_id}", {
-            headers: {
-                Accept: "application/octet-stream",
-            },
-            ...context.repo,
-            asset_id: assetId
-        }));
-        return toBuffer(result.data);
-    }
-    catch (error) {
-        core.setFailed(error.message);
-        console.error(error);
-    }
+  const response = await octokit.request("GET /repos/{owner}/{repo}/releases/assets/{asset_id}", {
+    headers: {
+      Accept: "application/octet-stream",
+    },
+    ...context.repo,
+    asset_id: assetId
+  });
+  return response.data;
 }
 
 async function uploadToCloudHub(cloudhub_org_id, cloudhub_envs, cloudhub_app_name_pattern, artifact, artifact_name, cloudhub_user, cloudhub_password) {
