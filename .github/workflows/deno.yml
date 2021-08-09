@@ -15,7 +15,7 @@ jobs:
         uses: ./
         with:
           #github_token: ${{secrets.GITHUB_TOKEN}}
-          release-tag: 'v21'
+          release-tag: 'v1'
           cloudhub-env: 'dev'
           cloudhub-app-name: 'mulesoft-app'
           #deployArgs: '{ "cloudhub_creds": { "client_id": "${{secrets.CLIENT_ID}}", "client_secret": "${{secrets.CLIENT_SECRET}}" }, "cloudhub_apps": [ {"env": "Sandbox", "name": "my-transformation-sandbox-api" }, {"env": "Sandbox", "name": "tp-transformation-api" } ] }'
