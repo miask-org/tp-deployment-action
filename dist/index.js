@@ -10492,6 +10492,7 @@ async function main() {
 
     try {
         const release = await getRelease(octokit, context, release_tag);
+        console.log(release);
         //const { id, name, node_id } = release.assets.filter(asset => asset.name.includes(release_tag))[0];
 		//commitSHA=node_id;
 		//versionId=name;
