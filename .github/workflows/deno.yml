@@ -15,7 +15,8 @@ jobs:
         uses: ./
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
-          #buildArgs: '{ "release_tag": "v18" }'
+          release-tag: 'v21'
+          cloudhub-apps: '{}'
           #deployArgs: '{ "cloudhub_creds": { "client_id": "${{secrets.CLIENT_ID}}", "client_secret": "${{secrets.CLIENT_SECRET}}" }, "cloudhub_apps": [ {"env": "Sandbox", "name": "my-transformation-sandbox-api" }, {"env": "Sandbox", "name": "tp-transformation-api" } ] }'
         
       - name: output
