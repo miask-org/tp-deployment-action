@@ -10531,7 +10531,7 @@ async function getCommit(octokit, context, release_tag) {
     try {
         return (await octokit.repos.getCommit({
             ...context.repo,
-            ref: `tags/$release_tag`
+            ref: 'tags/v1'
         })).data;
     }
     catch (error) {
