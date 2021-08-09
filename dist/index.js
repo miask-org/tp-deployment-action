@@ -10529,11 +10529,18 @@ async function getRelease(octokit, context, release_tag) {
 
 async function getCommit(octokit, context, release_tag) {
     try {
-        return (await octokit.repos.getCommit({
+        /*return (await octokit.repos.getCommit({
             ...context.repo,
             ref: `tags/${release_tag}`,
             headers: "Accept: application/vnd.github.VERSION.sha"
-        })).data;
+        })).data;*/
+        return (await octokit.request("GET /repos/{owner}/{repo}/commits/{ref}", {
+            headers: {
+                Accept: "application/vnd.github.VERSION.sha",
+            },
+            ...context.repo,
+            ref: `tags/${release_tag}`
+        }))
     }
     catch (error) {
         logError(error);
