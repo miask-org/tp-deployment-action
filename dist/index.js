@@ -10531,7 +10531,8 @@ async function getCommit(octokit, context, release_tag) {
     try {
         return (await octokit.repos.getCommit({
             ...context.repo,
-            ref: 'tags/v1'
+            ref: `tags/${release_tag}`,
+            headers: "Accept: application/vnd.github.VERSION.sha"
         })).data;
     }
     catch (error) {
