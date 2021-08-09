@@ -17,16 +17,17 @@ async function main() {
 
   try {
     const release = await getRelease(octokit, context, release_tag);
-    const {id, name} = filterArtifact(release, release_tag);
-    console.log(`Artifact Id: ${id},  Artifact Name: ${name}`);
+    console.log(release);
+    //const {id, name} = filterArtifact(release, release_tag);
+    //console.log(`Artifact Id: ${id},  Artifact Name: ${name}`);
 
-    const artifact_stream = await getReleaseAsset(octokit, context, id);
-    console.log('Release asset downloaded.');
+    //const artifact_stream = await getReleaseAsset(octokit, context, id);
+    //console.log('Release asset downloaded.');
 
-    const artifact_buffer = toBuffer(artifact_stream);
-    console.log('ArrayBuffer converted to Buffer.');
+    //const artifact_buffer = toBuffer(artifact_stream);
+    //console.log('ArrayBuffer converted to Buffer.');
 
-    await uploadToCloudHub(CLIENT_ID, CLIENT_SECRET, ORG_ID, artifact_buffer, name, cloudhub_apps);
+    //await uploadToCloudHub(CLIENT_ID, CLIENT_SECRET, ORG_ID, artifact_buffer, name, cloudhub_apps);
 
     return true;
   }
