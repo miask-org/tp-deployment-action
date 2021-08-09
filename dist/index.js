@@ -10223,6 +10223,64 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 5812:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const core = __nccwpck_require__(2186);
+const { context } = __nccwpck_require__(5438);
+const axios = __nccwpck_require__(6545);
+
+
+
+async function makeAndSendPagerAlert(integrationKey, errorMessage) {
+    try {
+        let alert = {
+            "payload": {
+                "summary": `${context.repo.repo}: Error in "${context.workflow}" run by @${context.actor}`,
+                "timestamp": new Date().toISOString(),
+                "source": 'MULESOFT-DEPLOY-ACTION',
+                "severity": 'critical',
+                "custom_details": {
+                    "run_details": `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+                    "error_message": errorMessage,
+                    "related_commits": context.payload.commits
+                        ? context.payload.commits.map((commit) => `${commit.message}: ${commit.url}`).join(', ')
+                        : 'No related commits',
+                },
+            },
+            "routing_key": integrationKey,
+            "event_action": 'trigger'
+        };
+        sendAlert(alert);
+    }
+    catch (error) {
+        core.setFailed(error.message);
+    }
+}
+
+async function sendAlert(alert) {
+    try {
+        const response = await axios.post('https://events.pagerduty.com/v2/enqueue', alert);
+
+        if (response.status === 202) {
+            console.log(`Successfully sent PagerDuty alert. Response: ${JSON.stringify(response.data)}`);
+        } else {
+            core.setFailed(
+                `PagerDuty API returned status code ${response.status} - ${JSON.stringify(response.data)}`
+            );
+        }
+    }
+    catch (error) {
+        core.setFailed(error);
+    }
+}
+
+module.exports = {
+    makeAndSendPagerAlert
+}
+
+/***/ }),
+
 /***/ 9975:
 /***/ ((module) => {
 
@@ -10399,140 +10457,167 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
 const core = __nccwpck_require__(2186);
-const github = __nccwpck_require__(5438);
+const github = __nccwpck_require__(5438)
 const axios = __nccwpck_require__(6545);
 const FormData = __nccwpck_require__(4334);
+const pager = __nccwpck_require__(5812);
+
+const ORG = {
+    ID: "5d528c97-b639-428c-bd03-bf3b247075c9"
+}
 
 async function main() {
-  const GITHUB_TOKEN = process.env.github_token;
-  const CLIENT_ID = process.env.client_id;
-  const CLIENT_SECRET = process.env.client_secret;
-  const ORG_ID = 'fdebe0d5-a2d7-4594-b1d3-db10e283e63b';
 
-  const release_tag = core.getInput('release-tag');
-  const cloudhub_apps = parseJSON(core.getInput('cloudhub-apps'));
+    const release_tag = core.getInput('release-tag');
+    const cloudhub_env = core.getInput('cloudhub-env');
+    const cloudhub_app_name = core.getInput('cloudhub-app-name');
+    if (!release_tag || !cloudhub_env || !cloudhub_app_name) {
+        logError("Insufficient/missing arguments...");
+        return;
+    }
 
-  const octokit = github.getOctokit(GITHUB_TOKEN);
-  const { context = {} } = github;
+    let cloudhub_org_id = core.getInput('cloudhub-org-id');
+    if (!cloudhub_org_id)
+        cloudhub_org_id = ORG.ID;
 
-  try {
-    const release = await getRelease(octokit, context, release_tag);
-    console.log(release);
-    //const {id, name} = filterArtifact(release, release_tag);
-    //console.log(`Artifact Id: ${id},  Artifact Name: ${name}`);
+    const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+    const CLOUDHUB_USER = process.env.CLOUDHUB_USER;
+    const CLOUDHUB_PASSWORD = process.env.CLOUDHUB_PASSWORD;
+    const octokit = github.getOctokit(GITHUB_TOKEN);
+    const { context = {} } = github;
 
-    //const artifact_stream = await getReleaseAsset(octokit, context, id);
-    //console.log('Release asset downloaded.');
+	var is_successful = false;
+	var versionId = "";
+	var commitSHA = "";
 
-    //const artifact_buffer = toBuffer(artifact_stream);
-    //console.log('ArrayBuffer converted to Buffer.');
-
-    //await uploadToCloudHub(CLIENT_ID, CLIENT_SECRET, ORG_ID, artifact_buffer, name, cloudhub_apps);
-
-    return true;
-  }
-  catch (error) {
-    console.error(error);
-    core.setFailed(error.message)
-    return;
-  }
+    try {
+        const release = await getRelease(octokit, context, release_tag);
+        //const { id, name, node_id } = release.assets.filter(asset => asset.name.includes(release_tag))[0];
+		//commitSHA=node_id;
+		//versionId=name;
+        //const artifact = await getReleaseAsset(octokit, context, id);		
+        //await uploadToCloudHub(cloudhub_org_id, cloudhub_env, cloudhub_app_name, artifact, name, CLOUDHUB_USER, CLOUDHUB_PASSWORD);		
+		is_successful = true;
+		console.log("action executed successfully.");
+    }
+    catch (error) {
+        logError(error);
+    }	
+	
+	//console.log("sending deployment details to event bridge.");
+	//await exportDeploymentDetailsToEventBridge(cloudhub_env,cloudhub_app_name,is_successful,versionId,commitSHA);
+	return is_successful;
 }
 
 main();
 
-function filterArtifact(release, release_tag) {
-  const artifact = release.assets
-                    .filter(asset => 
-                      asset.name
-                        .includes(release_tag));
-  if (!artifact[0]) {
-    throw new Error("Release artifact not found");
-  }
-  return artifact[0];
-}
 
 async function getRelease(octokit, context, release_tag) {
-  const release = await octokit.repos.getReleaseByTag({
-    ...context.repo,
-    tag: release_tag
-  });
-  return release.data;
+    try {
+        return (await octokit.repos.getReleaseByTag({
+            ...context.repo,
+            tag: release_tag
+        })).data;
+    }
+    catch (error) {
+        logError(error);
+    }
 }
 
 async function getReleaseAsset(octokit, context, assetId) {
-  const response = await octokit.request("GET /repos/{owner}/{repo}/releases/assets/{asset_id}", {
-    headers: {
-      Accept: "application/octet-stream",
-    },
-    ...context.repo,
-    asset_id: assetId
-  });
-  return response.data;
+    let result = null;
+    try {
+        result = (await octokit.request("GET /repos/{owner}/{repo}/releases/assets/{asset_id}", {
+            headers: {
+                Accept: "application/octet-stream",
+            },
+            ...context.repo,
+            asset_id: assetId
+        }));
+        return toBuffer(result.data);
+    }
+    catch (error) {
+        logError(error);
+    }
 }
 
-async function uploadToCloudHub(CLIENT_ID, CLIENT_SECRET, ORG_ID, artifact, artifact_name, cloudhub_apps) {   
-  const environments = await getEnvByOrgId(CLIENT_ID, CLIENT_SECRET, ORG_ID);
+async function uploadToCloudHub(cloudhub_org_id, cloudhub_env, cloudhub_app_name, artifact, artifact_name, cloudhub_user, cloudhub_password) {
+    try {
+        const environments = await getEnvByOrgId(cloudhub_user, cloudhub_password, cloudhub_org_id);
+        const env = environments.filter(e => e.name.toUpperCase() == cloudhub_env.toUpperCase());
+        if (env) {
+            var form_data = new FormData();
+            form_data.append('file', artifact, artifact_name);
 
-  for (const app of cloudhub_apps) {   
-    const env = environments.filter(e => e.name.toUpperCase() == app.env.toUpperCase());
-
-    var form_data = new FormData();
-    form_data.append('file', artifact, artifact_name);
-    await axios({
-      method: "post",
-      url: `https://anypoint.mulesoft.com/cloudhub/api/v2/applications/${app.name}/files`,
-      auth: { username: CLIENT_ID,  password: CLIENT_SECRET },
-      data: form_data,
-      maxContentLength: Infinity,
-      maxBodyLength: Infinity,
-      headers: { 
-        ...form_data.getHeaders(),
-        "Content-Length": form_data.getLengthSync(),
-        'X-ANYPNT-ENV-ID': env[0].id }
-    })
-    .then( () => {
-      console.log(app.env + " updated successfully.");
-    }, (error) => {
-      console.error(error);
-      core.setFailed(error.message);
-    })
-  }
+            await axios({
+                method: "post",
+                url: `https://anypoint.mulesoft.com/cloudhub/api/v2/applications/${cloudhub_app_name}/files`,
+                auth: { username: cloudhub_user, password: cloudhub_password },
+                data: form_data,
+                maxContentLength: Infinity,
+                maxBodyLength: Infinity,
+                headers: {
+                    ...form_data.getHeaders(),
+                    "Content-Length": form_data.getLengthSync(),
+                    'X-ANYPNT-ENV-ID': env[0].id
+                }
+            })
+                .then(() => {
+                    console.log(env[0].id + " updated successfully.");
+                }, (error) => {
+                    logError(error);
+                })
+        }
+    }
+    catch (error) {
+        logError(error);		
+    }
 }
 
-async function getEnvByOrgId(CLIENT_ID, CLIENT_SECRET, ORG_ID) {
-  try {
-    const response = await axios({
-      method: "get",
-      url: `https://anypoint.mulesoft.com/accounts/api/organizations/${ORG_ID}/environments`,
-      auth: { username: CLIENT_ID,  password: CLIENT_SECRET }
-    })
-    return response.data.data;
-  }
-  catch(error) {
-    console.error(error);
-    core.setFailed(error.message);
-  }
+async function exportDeploymentDetailsToEventBridge(cloudhub_env, cloudhub_app_name, is_successful, versionId, commitSHA){
+	try {		
+		const response = await axios({
+            method: "post",
+            url: `https://api-dev.invitationhomes.com/ci-cd/v1/deployments`,
+            data: { "version": versionId, "commit": commitSHA, "repository": cloudhub_app_name, "environment": cloudhub_env, "isSuccessful": is_successful, "timestamp": Date.now() }
+        })
+        return response.data;		
+	} 
+	catch (error) {
+		logError(error);
+	}
 }
 
-function parseJSON(string) {
-  try {
-    var json = JSON.parse(string);
-    return json;
-  }
-  catch (error) {
-    console.error(error);
-    core.setFailed(error.message)
-  }
-  return null;
+async function getEnvByOrgId(cloudhub_user, cloudhub_password, org_id) {
+    try {
+        const response = await axios({
+            method: "get",
+            url: `https://anypoint.mulesoft.com/accounts/api/organizations/${org_id}/environments`,
+            auth: { username: cloudhub_user, password: cloudhub_password }
+        })
+        return response.data.data;
+    }
+    catch (error) {
+        logError(error);
+    }
 }
 
-function toBuffer(ab) {
-    var buf = Buffer.alloc(ab.byteLength);
-    var view = new Uint8Array(ab);
+function toBuffer(value) {
+    var buf = Buffer.alloc(value.byteLength);
+    var view = new Uint8Array(value);
     for (var i = 0; i < buf.length; ++i) {
         buf[i] = view[i];
     }
     return buf;
+}
+
+function logError(error) {
+    core.setFailed(error.message);
+    console.error(error);
+    const PAGERDUTY_INTEGRATION_KEY = process.env.PAGERDUTY_INTEGRATION_KEY;
+    if (PAGERDUTY_INTEGRATION_KEY) {
+        pager.makeAndSendPagerAlert(PAGERDUTY_INTEGRATION_KEY, error);
+    }
 }
 
 })();
