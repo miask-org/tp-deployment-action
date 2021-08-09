@@ -14,11 +14,12 @@ jobs:
         id: custom_action
         uses: ./
         with:
-          github_token: ${{secrets.GITHUB_TOKEN}}
+          #github_token: ${{secrets.GITHUB_TOKEN}}
           release-tag: 'v21'
           cloudhub-apps: '{}'
           #deployArgs: '{ "cloudhub_creds": { "client_id": "${{secrets.CLIENT_ID}}", "client_secret": "${{secrets.CLIENT_SECRET}}" }, "cloudhub_apps": [ {"env": "Sandbox", "name": "my-transformation-sandbox-api" }, {"env": "Sandbox", "name": "tp-transformation-api" } ] }'
-        
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: output
         run: echo ${{steps.custom_action.outputs.release_number}}
       
