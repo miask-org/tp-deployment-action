@@ -33,14 +33,15 @@ async function main() {
 	var commitSHA = "";
 
     try {
-        const release = await getRelease(octokit, context, release_tag);
+        console.log("Testing 1");
+        //const release = await getRelease(octokit, context, release_tag);
         //const { id, name, node_id } = release.assets.filter(asset => asset.name.includes(release_tag))[0];
 		//commitSHA=node_id;
 		//versionId=name;
         //const artifact = await getReleaseAsset(octokit, context, id);		
         //await uploadToCloudHub(cloudhub_org_id, cloudhub_env, cloudhub_app_name, artifact, name, CLOUDHUB_USER, CLOUDHUB_PASSWORD);		
-		is_successful = true;
-		console.log("action executed successfully.");
+		//is_successful = true;
+		//console.log("action executed successfully.");
     }
     catch (error) {
         logError(error);
